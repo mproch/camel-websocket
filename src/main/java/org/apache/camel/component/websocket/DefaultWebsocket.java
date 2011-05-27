@@ -1,0 +1,57 @@
+package org.apache.camel.component.websocket;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+import org.eclipse.jetty.websocket.WebSocket;
+import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
+
+public class DefaultWebsocket implements WebSocket, OnTextMessage, Serializable {
+	
+	private static final long serialVersionUID = -575701599776801400L;
+	private Connection connection;
+	private String connectionKey;
+	
+	private WebsocketStore store;
+	private transient WebsocketConsumer consumer;
+	
+	public DefaultWebsocket(WebsocketStore store, WebsocketConsumer consumer) {
+		this.store = store;
+		this.consumer = consumer;
+	}
+	
+	@Override
+	public void onClose(int closeCode, String message) {
+		store.remove(this);
+	}
+
+	@Override
+	public void onOpen(Connection connection) {
+		this.connection = connection;
+		this.connectionKey = UUID.randomUUID().toString();
+		store.add(this.connectionKey, this);
+	}
+
+	@Override
+	public void onMessage(String message) {
+		this.consumer.sendExchange(this.connectionKey, message);
+	}
+
+	// getters and setters
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
+	public String getConnectionKey() {
+		return connectionKey;
+	}
+
+	public void setConnectionKey(String connectionKey) {
+		this.connectionKey = connectionKey;
+	}
+	
+}
