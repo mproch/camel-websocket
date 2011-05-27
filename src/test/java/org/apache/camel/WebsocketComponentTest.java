@@ -17,6 +17,7 @@
 package org.apache.camel;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
@@ -31,9 +32,9 @@ public class WebsocketComponentTest extends CamelTestSupport {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
+            	
             	from("websocket://foo")
             	.log("${body}")
-            	.marshal().string("UTF-8")
             	.to("file:/home/claus/tmp/file?doneFileName=done");           	
             	
             	from("file:/home/claus/tmp/file")
