@@ -17,7 +17,6 @@
 package org.apache.camel;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
