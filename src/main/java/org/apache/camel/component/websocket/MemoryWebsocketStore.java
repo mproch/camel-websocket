@@ -1,10 +1,9 @@
 package org.apache.camel.component.websocket;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class MemoryWebsocketStore extends HashMap<String, DefaultWebsocket> implements WebsocketStore {
+public class MemoryWebsocketStore extends ConcurrentHashMap<String, DefaultWebsocket> implements WebsocketStore {
 
 	private static final long serialVersionUID = -2826843758230613922L;
 
