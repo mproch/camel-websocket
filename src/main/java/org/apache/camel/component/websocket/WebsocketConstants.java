@@ -4,4 +4,6 @@ public class WebsocketConstants {
 
 	public final static String CONNECTION_KEY = "websocket.connectionKey";
 	
+	public static final String DEFAULT_HOST = "0.0.0.0";
+	public static final int    DEFAULT_PORT = 9292;
 }
