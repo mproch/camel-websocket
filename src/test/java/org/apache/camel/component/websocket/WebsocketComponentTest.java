@@ -44,7 +44,11 @@ public class WebsocketComponentTest {
     @Test
     public void testCreateServerWithoutStaticContent() {
         ServletContextHandler handler = component.createContext();
-        Server server = component.createServer(handler, "localhost", 9292, null);
+        Server server = component.createServer(handler, "localhost", 1988, null);
+        assertEquals(1, server.getConnectors().length);
+        assertEquals("localhost", server.getConnectors()[0].getHost());
+        assertEquals(1988, server.getConnectors()[0].getPort());
+        assertFalse(server.getConnectors()[0].isStarted());
         assertEquals(handler, server.getHandler());
         assertEquals(1, server.getHandlers().length);
         assertEquals(handler, server.getHandlers()[0]);
@@ -60,7 +64,11 @@ public class WebsocketComponentTest {
     @Test
     public void testCreateServerWithStaticContent() {
         ServletContextHandler handler = component.createContext();
-        Server server = component.createServer(handler, "localhost", 9292, "public/");
+        Server server = component.createServer(handler, "localhost", 1988, "public/");
+        assertEquals(1, server.getConnectors().length);
+        assertEquals("localhost", server.getConnectors()[0].getHost());
+        assertEquals(1988, server.getConnectors()[0].getPort());
+        assertFalse(server.getConnectors()[0].isStarted());
         assertEquals(handler, server.getHandler());
         assertEquals(1, server.getHandlers().length);
         assertEquals(handler, server.getHandlers()[0]);
