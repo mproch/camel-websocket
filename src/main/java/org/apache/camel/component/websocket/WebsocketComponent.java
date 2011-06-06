@@ -16,52 +16,136 @@
  */
 package org.apache.camel.component.websocket;
 
+import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebsocketComponent extends DefaultComponent {
 
-	private ServletContextHandler context;
-	private Server server;
-	
-	public WebsocketComponent() {
-		
-		try {
-			this.startServer();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
-	@Override
-	/**
-	 * uri --> websocket://foo?storeImplementationClass=org.apache.camel.hazelcast.HazelcastWebsocketStore&storeName=foo
-	 */
-	protected Endpoint createEndpoint(String uri, String remaining,
-			Map<String, Object> parameters) throws Exception {
-		
-		return  new WebsocketEndpoint(uri, this, remaining);
-	}
-	
-	protected void startServer() throws Exception {
-        this.server = new Server(9292);
-        
-        this.context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    private static final Logger LOG = LoggerFactory.getLogger(WebsocketComponent.class);
+
+    private ServletContextHandler context;
+    private Server server;
+
+    /** Host name for server. */
+    private String host = WebsocketConstants.DEFAULT_HOST;
+
+    /** Port for server. */
+    private int port = WebsocketConstants.DEFAULT_PORT;
+
+    /** Server static content location. */
+    private String staticResources;
+
+    /** 
+     * Map for storing endpoints. 
+     * Endpoint is identified by remaining part from endpoint URI.
+     * Eg. <tt>ws://foo?bar=123</tt> and <tt>ws://foo</tt> are referring to the same endpoint.
+     */
+    private Map<String, WebsocketEndpoint> endpoints = new HashMap<String, WebsocketEndpoint>();
+
+    public WebsocketComponent() {
+    }
+
+    @Override
+    /**
+     * uri --> websocket://foo?storeImplementationClass=org.apache.camel.hazelcast.HazelcastWebsocketStore&storeName=foo
+     */
+    protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
+        WebsocketEndpoint endpoint = endpoints.get(remaining);
+        if (endpoint == null) {
+            endpoint = new WebsocketEndpoint(uri, this, remaining);
+            endpoints.put(remaining, endpoint);
+        }
+        return endpoint;
+    }
+
+    /**
+     * @param host the host to set
+     */
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    /**
+     * @param port the port to set
+     */
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * @param staticResources the staticResources to set
+     */
+    public void setStaticResources(String staticResources) {
+        this.staticResources = staticResources;
+    }
+
+    ServletContextHandler createContext() {
+        return new ServletContextHandler(ServletContextHandler.SESSIONS);
+    }
+
+    protected Server createServer(ServletContextHandler context, String host, int port, String home) {
+        InetSocketAddress address = new InetSocketAddress(host, port);
+        Server server = new Server(address);
+
         context.setContextPath("/");
- 
+
+        SessionManager sm = new HashSessionManager();
+        SessionHandler sh = new SessionHandler(sm);
+        context.setSessionHandler(sh);
+
+        if (home != null) {
+            context.setResourceBase(home);
+            DefaultServlet defaultServlet = new DefaultServlet();
+            ServletHolder holder = new ServletHolder(defaultServlet);
+
+            // avoid file locking on windops
+            // http://stackoverflow.com/questions/184312/how-to-make-jetty-dynamically-load-static-pages
+            holder.setInitParameter("useFileMappedBuffer", "false");
+            context.addServlet(holder, "/");
+        }
+
         server.setHandler(context);
  
-        server.start();
-	}
-	
-	public void addServlet(WebsocketStore store, WebsocketConsumer consumer, String remaining) {
-		this.context.addServlet(new ServletHolder(new WebsocketComponentServlet(store, consumer)), String.format("/%s/*", remaining));
-	}
+        return server;
+    }
 
+    public void addServlet(WebsocketStore store, WebsocketConsumer consumer, String remaining) {
+        this.context.addServlet(new ServletHolder(new WebsocketComponentServlet(store, consumer)), String.format("/%s/*", remaining));
+    }
+
+    /**
+     * @see org.apache.camel.impl.DefaultComponent#doStart()
+     */
+    @Override
+    protected void doStart() throws Exception {
+        super.doStart();
+        LOG.info("Staring server {}:{}; static resources: {}", new Object[] { host, port, staticResources });
+        context = createContext();
+        server = createServer(context, host, port, staticResources);
+        server.start();
+    }
+
+    /**
+     * @see org.apache.camel.impl.DefaultComponent#doStop()
+     */
+    @Override
+    public void doStop() throws Exception {
+        if (server != null) {
+            server.stop();
+        }
+    }
 }
