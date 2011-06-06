@@ -56,6 +56,12 @@ public class WebsocketComponent extends DefaultComponent {
      */
     private Map<String, WebsocketEndpoint> endpoints = new HashMap<String, WebsocketEndpoint>();
 
+    /**
+     * Map for storing servlets.
+     * {@link WebsocketComponentServlet} is identified by pathSpec {@link String}.
+     */
+    private Map<String, WebsocketComponentServlet> servlets = new HashMap<String, WebsocketComponentServlet>();
+    
     public WebsocketComponent() {
     }
 
@@ -123,8 +129,34 @@ public class WebsocketComponent extends DefaultComponent {
         return server;
     }
 
-    public void addServlet(WebsocketStore store, WebsocketConsumer consumer, String remaining) {
-        this.context.addServlet(new ServletHolder(new WebsocketComponentServlet(store, consumer)), String.format("/%s/*", remaining));
+    public WebsocketComponentServlet addServlet(WebsocketStore store, WebsocketConsumer consumer, String remaining) {
+        
+        String pathSpec = createPathSpec(remaining);
+        WebsocketComponentServlet servlet = servlets.get(pathSpec);
+        if (servlet == null) {
+            servlet = createServlet(store, pathSpec, servlets, context);
+        }
+        setServletConsumer(servlet, consumer);
+        return servlet;
+    }
+    
+    String createPathSpec(String remaining) {
+        return String.format("/%s/*", remaining);
+    }
+    
+    void setServletConsumer(WebsocketComponentServlet servlet, WebsocketConsumer consumer) {
+        if (servlet.getConsumer() == null && consumer != null) {
+            servlet.setConsumer(consumer);
+        }
+    }
+    
+    WebsocketComponentServlet createServlet(WebsocketStore store, String pathSpec, 
+            Map<String, WebsocketComponentServlet> servlets, ServletContextHandler handler) {
+        
+        WebsocketComponentServlet servlet = new WebsocketComponentServlet(store);
+        servlets.put(pathSpec, servlet);
+        handler.addServlet(new ServletHolder(servlet), pathSpec);
+        return servlet;
     }
 
     /**
