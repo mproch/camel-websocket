@@ -56,6 +56,7 @@ public class WebsocketProducer extends DefaultProducer {
 	private void sendMessage(DefaultWebsocket websocket, String message) throws IOException{
 		// send message
 		if(websocket != null) {
+		    // TODO - 07.06.2011, LK - check if connection is still open
 			websocket.getConnection().sendMessage(message);
 		}
 	}
