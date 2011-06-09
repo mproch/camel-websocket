@@ -24,7 +24,7 @@ public class WebsocketComponentTest extends CamelTestSupport {
 
     @Test
     public void testWebsocketCall() throws Exception {
-        Thread.sleep(5 * 60 * 1000);
+        Thread.sleep(15 * 60 * 1000);
     }
 
     @Override
@@ -33,10 +33,25 @@ public class WebsocketComponentTest extends CamelTestSupport {
             public void configure() {
             	
             	from("websocket://foo")
-            	.log("${body}")
-            	.to("file:/home/claus/tmp/file?doneFileName=done");           	
+            	.log("received message: ")
+            	.log("----> ${body}")
+            	.choice()
+            		.when(body(Integer.class).isGreaterThan(500))
+            			.to("seda://greater500")
+            		.when(body(Integer.class).isLessThan(500))
+            			.to("seda://less500")
+            		.otherwise()
+            			.setBody(constant("request failed..."))
+            			.to("websocket://foo");           	
             	
-            	from("file:/home/claus/tmp/file")
+            	from("seda://greater500")
+            	.setBody(constant("forms/c.xml"))
+            	.log("C --> ${body}")
+            	.to("websocket://foo");
+            	
+            	from("seda://less500")
+            	.setBody(constant("forms/b.xml"))
+            	.log("B --> ${body}")
             	.to("websocket://foo");
             }
         };
