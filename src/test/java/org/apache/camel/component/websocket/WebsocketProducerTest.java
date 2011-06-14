@@ -17,7 +17,6 @@ import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -175,7 +174,13 @@ public class WebsocketProducerTest {
         doThrow(exception).when(connection).sendMessage(MESSAGE);
         when(connection.isOpen()).thenReturn(true);
 
-        websocketProducer.process(exchange);
+        try {
+            websocketProducer.process(exchange);
+            fail("Exception expected");
+        }
+        catch (Exception e) {
+            assertEquals(exception, e.getCause());
+        }
         
         InOrder inOrder = inOrder(endpoint, store, connection, defaultWebsocket1, defaultWebsocket2, exchange, inMessage);
         inOrder.verify(exchange, times(1)).getIn();
@@ -185,6 +190,10 @@ public class WebsocketProducerTest {
         inOrder.verify(defaultWebsocket1, times(1)).getConnection();
         inOrder.verify(connection, times(1)).isOpen();
         inOrder.verify(defaultWebsocket1, times(1)).getConnection();
+        inOrder.verify(connection, times(1)).sendMessage(MESSAGE);
+        inOrder.verify(defaultWebsocket2, times(1)).getConnection();
+        inOrder.verify(connection, times(1)).isOpen();
+        inOrder.verify(defaultWebsocket2, times(1)).getConnection();
         inOrder.verify(connection, times(1)).sendMessage(MESSAGE);
         inOrder.verifyNoMoreInteractions();
     }
@@ -199,19 +208,22 @@ public class WebsocketProducerTest {
         when(inMessage.getHeader(WebsocketConstants.SEND_TO_ALL)).thenReturn(false);
         when(inMessage.getHeader(WebsocketConstants.CONNECTION_KEY, String.class)).thenReturn(null);
 
-        websocketProducer.process(exchange);
+        try {
+            websocketProducer.process(exchange);
+            fail("Exception expected");
+        }
+        catch (Exception e) {
+            assertEquals(IllegalArgumentException.class, e.getClass());
+            assertNotNull(e.getMessage());
+            assertNull(e.getCause());
+        }
         
         InOrder inOrder = inOrder(endpoint, store, connection, defaultWebsocket1, defaultWebsocket2, exchange, inMessage);
         inOrder.verify(exchange, times(1)).getIn();
         inOrder.verify(inMessage, times(1)).getBody(String.class);
         inOrder.verify(inMessage, times(1)).getHeader(WebsocketConstants.SEND_TO_ALL);
         inOrder.verify(inMessage, times(1)).getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
-        ArgumentCaptor<Throwable> exceptionCaptor = ArgumentCaptor.forClass(Throwable.class);
-        inOrder.verify(exchange, times(1)).setException(exceptionCaptor.capture());
         inOrder.verifyNoMoreInteractions();
-        assertEquals(IllegalArgumentException.class, exceptionCaptor.getValue().getClass());
-        assertNotNull(exceptionCaptor.getValue().getMessage());
-        assertNull(exceptionCaptor.getValue().getCause());
     }
 
 
@@ -348,13 +360,23 @@ public class WebsocketProducerTest {
         doThrow(exception).when(connection).sendMessage(MESSAGE);
         when(connection.isOpen()).thenReturn(true);
 
-        websocketProducer.sendToAll(store, MESSAGE);
+        try {
+            websocketProducer.sendToAll(store, MESSAGE);
+            fail("Exception expected");
+        }
+        catch (Exception e) {
+            assertEquals(exception, e.getCause());
+        }
         
         InOrder inOrder = inOrder(store, connection, defaultWebsocket1, defaultWebsocket2);
         inOrder.verify(store, times(1)).getAll();
         inOrder.verify(defaultWebsocket1, times(1)).getConnection();
         inOrder.verify(connection, times(1)).isOpen();
         inOrder.verify(defaultWebsocket1, times(1)).getConnection();
+        inOrder.verify(connection, times(1)).sendMessage(MESSAGE);
+        inOrder.verify(defaultWebsocket2, times(1)).getConnection();
+        inOrder.verify(connection, times(1)).isOpen();
+        inOrder.verify(defaultWebsocket2, times(1)).getConnection();
         inOrder.verify(connection, times(1)).sendMessage(MESSAGE);
         inOrder.verifyNoMoreInteractions();
     }

@@ -39,7 +39,7 @@ public class WebsocketProducer extends DefaultProducer {
                 sendMessage(websocket, message);
             } 
             else {
-                exchange.setException(new IllegalArgumentException("Failed to send message to single connection; connetion key not set."));
+                throw new IllegalArgumentException("Failed to send message to single connection; connetion key not set.");
             }
         }
     }
@@ -51,14 +51,20 @@ public class WebsocketProducer extends DefaultProducer {
     }
     
     void sendToAll(WebsocketStore store, String message) throws Exception {
-        // XXX - 11.06.2011, LK - message procession is stopped after first exception & exception it self is swallowed
-        try {
-            Collection<DefaultWebsocket> websockets = store.getAll();
-            for (DefaultWebsocket websocket : websockets) {
-                this.sendMessage(websocket, message);
+        Collection<DefaultWebsocket> websockets = store.getAll();
+        Exception exception = null;
+        for (DefaultWebsocket websocket : websockets) {
+            try {
+                sendMessage(websocket, message);
+            } 
+            catch (Exception e) {
+                if (exception == null) {
+                    exception = new Exception("Failed to deliver message to one or more recipients.", e);
+                }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        if (exception != null) {
+            throw exception;
         }
     }
 
