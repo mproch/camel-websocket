@@ -40,6 +40,7 @@ public class ProducerOnlyTest extends CamelTestSupport {
 
                 from("timer://foo?fixedRate=true&period=1000")
                     .bean(counter)
+                    .setHeader(WebsocketConstants.SEND_TO_ALL, constant(true))
                     .to("websocket://counter");
             }
         };

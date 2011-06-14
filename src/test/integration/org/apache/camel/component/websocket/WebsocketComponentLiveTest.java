@@ -35,7 +35,7 @@ public class WebsocketComponentLiveTest extends CamelTestSupport {
                 
                 from("websocket://foo")
                     .log("${body}")
-                    .setHeader(WebsocketConstants.CONNECTION_KEY, constant(null))
+                    .setHeader(WebsocketConstants.SEND_TO_ALL, constant(true))
                     .to("websocket://foo");
             }
         };
