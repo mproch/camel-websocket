@@ -6,10 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MemoryWebsocketStore extends ConcurrentHashMap<String, DefaultWebsocket> implements WebsocketStore {
 
 	private static final long serialVersionUID = -2826843758230613922L;
+	
 
 	@Override
-	public void add(String key, DefaultWebsocket ws) {
-		super.put(key, ws);
+	public void add(DefaultWebsocket ws) {
+		super.put(ws.getConnectionKey(),ws);
 	}
 
 	@Override
