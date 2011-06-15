@@ -34,7 +34,11 @@ public class DefaultWebsocket implements WebSocket, OnTextMessage, Serializable 
 
 	@Override
 	public void onMessage(String message) {
-		this.consumer.sendExchange(this.connectionKey, message);
+		if (this.consumer != null) {
+            this.consumer.sendExchange(this.connectionKey, message);
+        }
+        // consumer is not set, this is produce only websocket
+        // TODO - 06.06.2011, LK - deliver exchange to dead letter channel
 	}
 
 	// getters and setters
