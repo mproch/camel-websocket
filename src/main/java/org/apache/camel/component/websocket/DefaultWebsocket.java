@@ -7,56 +7,63 @@ import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
 
 public class DefaultWebsocket implements WebSocket, OnTextMessage, Serializable {
-	
-	private static final long serialVersionUID = -575701599776801400L;
-	private Connection connection;
-	private String connectionKey;
-	private NodeSynchronization sync;
 
-	private transient WebsocketConsumer consumer;
-	
-	 public DefaultWebsocket(NodeSynchronization sync, WebsocketConsumer consumer) {
-	        this.sync = sync;
-	        this.consumer = consumer;
-	    }
+private static final long serialVersionUID = -575701599776801400L;
+private Connection connection;
+private String connectionKey;
 
-	    @Override
-	    public void onClose(int closeCode, String message) {
-	        sync.removeSocket(this);
-	    }
+private transient WebsocketStore store;
+private transient WebsocketConsumer consumer;
 
-	    @Override
-	    public void onOpen(Connection connection) {
-	        this.connection = connection;
-	        this.connectionKey = UUID.randomUUID().toString();
-	        sync.addSocket(this);
-	    }
+public DefaultWebsocket(WebsocketStore store, WebsocketConsumer consumer) {
+this.store = store;
+this.consumer = consumer;
+}
 
-	
-	@Override
-	public void onMessage(String message) {
-		this.consumer.sendExchange(this.connectionKey, message);
-	}
+@Override
+public void onClose(int closeCode, String message) {
+store.remove(this);
+}
 
-	// getters and setters
-	public Connection getConnection() {
-		return connection;
-	}
+@Override
+public void onOpen(Connection connection) {
+this.connection = connection;
+this.connectionKey = UUID.randomUUID().toString();
+store.add(this.connectionKey, this);
+}
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
+@Override
+public void onMessage(String message) {
+if (this.consumer != null) {
+            this.consumer.sendExchange(this.connectionKey, message);
+        }
+        // consumer is not set, this is produce only websocket
+        // TODO - 06.06.2011, LK - deliver exchange to dead letter channel
+}
 
-	public String getConnectionKey() {
-		return connectionKey;
-	}
+// getters and setters
+public Connection getConnection() {
+return connection;
+}
 
-	public void setConnectionKey(String connectionKey) {
-		this.connectionKey = connectionKey;
-	}
+public void setConnection(Connection connection) {
+this.connection = connection;
+}
 
-	public void setConsumer(WebsocketConsumer consumer) {
-		this.consumer = consumer;
-	}
-	
+public String getConnectionKey() {
+return connectionKey;
+}
+
+public void setConnectionKey(String connectionKey) {
+this.connectionKey = connectionKey;
+}
+
+public void setStore(WebsocketStore store) {
+this.store = store;
+}
+
+public void setConsumer(WebsocketConsumer consumer) {
+this.consumer = consumer;
+}
+
 }
