@@ -118,7 +118,7 @@ public class WebsocketComponent extends DefaultComponent {
             DefaultServlet defaultServlet = new DefaultServlet();
             ServletHolder holder = new ServletHolder(defaultServlet);
 
-            // avoid file locking on windops
+            // avoid file locking on windows
             // http://stackoverflow.com/questions/184312/how-to-make-jetty-dynamically-load-static-pages
             holder.setInitParameter("useFileMappedBuffer", "false");
             context.addServlet(holder, "/");
@@ -129,12 +129,12 @@ public class WebsocketComponent extends DefaultComponent {
         return server;
     }
 
-    public WebsocketComponentServlet addServlet(WebsocketStore store, WebsocketConsumer consumer, String remaining) {
+    public WebsocketComponentServlet addServlet(NodeSynchronization sync, WebsocketConsumer consumer, String remaining) {
         
         String pathSpec = createPathSpec(remaining);
         WebsocketComponentServlet servlet = servlets.get(pathSpec);
         if (servlet == null) {
-            servlet = createServlet(store, pathSpec, servlets, context);
+            servlet = createServlet(sync, pathSpec, servlets, context);
         }
         setServletConsumer(servlet, consumer);
         return servlet;
@@ -150,10 +150,10 @@ public class WebsocketComponent extends DefaultComponent {
         }
     }
     
-    WebsocketComponentServlet createServlet(WebsocketStore store, String pathSpec, 
+    WebsocketComponentServlet createServlet(NodeSynchronization sync, String pathSpec, 
             Map<String, WebsocketComponentServlet> servlets, ServletContextHandler handler) {
         
-        WebsocketComponentServlet servlet = new WebsocketComponentServlet(store);
+        WebsocketComponentServlet servlet = new WebsocketComponentServlet(sync);
         servlets.put(pathSpec, servlet);
         handler.addServlet(new ServletHolder(servlet), pathSpec);
         return servlet;

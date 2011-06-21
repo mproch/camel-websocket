@@ -7,16 +7,26 @@ import org.apache.camel.impl.DefaultEndpoint;
 
 public class WebsocketEndpoint extends DefaultEndpoint {
 
-    private WebsocketStore store = new MemoryWebsocketStore();
+	
+	// Todo: Change to Options
+    private NodeSynchronization sync = new NodeSynchronizationImpl(new MemoryWebsocketStore(), new MemoryWebsocketStore());
+    
     private String remaining;
+
+	private WebsocketStore store;
 
     public WebsocketEndpoint() {
 
     }
-
+    
     public WebsocketEndpoint (String uri, WebsocketComponent component, String remaining) {
         super(uri, component);
         this.remaining = remaining;
+        
+        this.store = new MemoryWebsocketStore(); 
+        // TODO: init globalStore
+        this.sync = new NodeSynchronizationImpl(this.store, null);
+        
     }
 
     @Override
@@ -26,7 +36,7 @@ public class WebsocketEndpoint extends DefaultEndpoint {
         WebsocketConsumer consumer = new WebsocketConsumer(this, processor);
 
         // register servlet
-        ((WebsocketComponent) super.getComponent()).addServlet(this.store, consumer, this.remaining);
+        ((WebsocketComponent) super.getComponent()).addServlet(sync, consumer, this.remaining);
 
         return consumer;
     }
@@ -35,7 +45,7 @@ public class WebsocketEndpoint extends DefaultEndpoint {
     public Producer createProducer() throws Exception {
 
         // register servlet without consumer
-        ((WebsocketComponent) super.getComponent()).addServlet(this.store, null, this.remaining);
+        ((WebsocketComponent) super.getComponent()).addServlet(sync, null, this.remaining);
 
         return new WebsocketProducer(this, this.store);
     }

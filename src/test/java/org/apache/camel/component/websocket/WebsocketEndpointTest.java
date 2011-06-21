@@ -51,11 +51,13 @@ public class WebsocketEndpointTest {
         assertNotNull(consumer);
         assertEquals(WebsocketConsumer.class, consumer.getClass());
         InOrder inOrder = inOrder(component, processor);
-        ArgumentCaptor<WebsocketStore> storeCaptor = ArgumentCaptor.forClass(WebsocketStore.class);
+        ArgumentCaptor<NodeSynchronization> synchronizationCaptor = ArgumentCaptor.forClass(NodeSynchronization.class);
         ArgumentCaptor<WebsocketConsumer> consumerCaptor = ArgumentCaptor.forClass(WebsocketConsumer.class);
-        inOrder.verify(component, times(1)).addServlet(storeCaptor.capture(), consumerCaptor.capture(), eq(REMAINING));
+        inOrder.verify(component, times(1)).addServlet(synchronizationCaptor.capture(), consumerCaptor.capture(), eq(REMAINING));
         inOrder.verifyNoMoreInteractions();
-        assertEquals(MemoryWebsocketStore.class, storeCaptor.getValue().getClass());
+        
+        assertEquals(NodeSynchronizationImpl.class, synchronizationCaptor.getValue().getClass());
+        
         assertEquals(consumer, consumerCaptor.getValue());
     }
 
@@ -68,10 +70,11 @@ public class WebsocketEndpointTest {
         assertNotNull(producer);
         assertEquals(WebsocketProducer.class, producer.getClass());
         InOrder inOrder = inOrder(component, processor);
-        ArgumentCaptor<WebsocketStore> storeCaptor = ArgumentCaptor.forClass(WebsocketStore.class);
-        inOrder.verify(component, times(1)).addServlet(storeCaptor.capture(), (WebsocketConsumer)isNull(), eq(REMAINING));
+        ArgumentCaptor<NodeSynchronization> synchronizationCaptor = ArgumentCaptor.forClass(NodeSynchronization.class);
+        inOrder.verify(component, times(1)).addServlet(synchronizationCaptor.capture(), (WebsocketConsumer)isNull(), eq(REMAINING));
         inOrder.verifyNoMoreInteractions();
-        assertEquals(MemoryWebsocketStore.class, storeCaptor.getValue().getClass());
+        
+        assertEquals(NodeSynchronizationImpl.class, synchronizationCaptor.getValue().getClass());
     }
 
     /**

@@ -37,7 +37,7 @@ public class WebsocketComponentTest {
     private WebsocketConsumer consumer;
 
     @Mock
-    private WebsocketStore store;
+    private NodeSynchronization sync;
 
     @Mock
     private WebsocketComponentServlet servlet;
@@ -134,7 +134,7 @@ public class WebsocketComponentTest {
     @Test
     public void testSetServletConsumer() throws Exception {
         when(servlet.getConsumer()).thenReturn(null, null, consumer);
-        InOrder inOrder = inOrder(servlet, consumer, store);
+        InOrder inOrder = inOrder(servlet, consumer, sync);
         component.setServletConsumer(servlet, null);        // null && null
         inOrder.verify(servlet, times(0)).setConsumer(null);
         component.setServletConsumer(servlet, consumer);    // null && not null
@@ -150,8 +150,8 @@ public class WebsocketComponentTest {
      */
     @Test
     public void testCreateServlet() throws Exception {
-        component.createServlet(store, PATH_SPEC_ONE, servlets, handler);
-        InOrder inOrder = inOrder(servlet, consumer, store, servlets, handler);
+        component.createServlet(sync, PATH_SPEC_ONE, servlets, handler);
+        InOrder inOrder = inOrder(servlet, consumer, sync, servlets, handler);
         ArgumentCaptor<WebsocketComponentServlet> servletCaptor = ArgumentCaptor.forClass(WebsocketComponentServlet.class);
         inOrder.verify(servlets, times(1)).put(eq(PATH_SPEC_ONE), servletCaptor.capture());
         ArgumentCaptor<ServletHolder> holderCaptor = ArgumentCaptor.forClass(ServletHolder.class);
@@ -177,8 +177,8 @@ public class WebsocketComponentTest {
         component.setCamelContext(camelContext);
         component.setPort(0);
         component.doStart();
-        WebsocketComponentServlet s1 = component.addServlet(store, null, PATH_ONE);
-        WebsocketComponentServlet s2 = component.addServlet(store, null, PATH_TWO);
+        WebsocketComponentServlet s1 = component.addServlet(sync, null, PATH_ONE);
+        WebsocketComponentServlet s2 = component.addServlet(sync, null, PATH_TWO);
         assertNotNull(s1);
         assertNotNull(s2);
         assertNotSame(s1, s2);
@@ -195,8 +195,8 @@ public class WebsocketComponentTest {
         component.setCamelContext(camelContext);
         component.setPort(0);
         component.doStart();
-        WebsocketComponentServlet s1 = component.addServlet(store, consumer, PATH_ONE);
-        WebsocketComponentServlet s2 = component.addServlet(store, consumer, PATH_TWO);
+        WebsocketComponentServlet s1 = component.addServlet(sync, consumer, PATH_ONE);
+        WebsocketComponentServlet s2 = component.addServlet(sync, consumer, PATH_TWO);
         assertNotNull(s1);
         assertNotNull(s2);
         assertNotSame(s1, s2);
@@ -213,8 +213,8 @@ public class WebsocketComponentTest {
         component.setCamelContext(camelContext);
         component.setPort(0);
         component.doStart();
-        WebsocketComponentServlet s1 = component.addServlet(store, null, PATH_ONE);
-        WebsocketComponentServlet s2 = component.addServlet(store, consumer, PATH_ONE);
+        WebsocketComponentServlet s1 = component.addServlet(sync, null, PATH_ONE);
+        WebsocketComponentServlet s2 = component.addServlet(sync, consumer, PATH_ONE);
         assertNotNull(s1);
         assertNotNull(s2);
         assertEquals(s1, s2);
@@ -230,8 +230,8 @@ public class WebsocketComponentTest {
         component.setCamelContext(camelContext);
         component.setPort(0);
         component.doStart();
-        WebsocketComponentServlet s1 = component.addServlet(store, consumer, PATH_ONE);
-        WebsocketComponentServlet s2 = component.addServlet(store, null, PATH_ONE);
+        WebsocketComponentServlet s1 = component.addServlet(sync, consumer, PATH_ONE);
+        WebsocketComponentServlet s2 = component.addServlet(sync, null, PATH_ONE);
         assertNotNull(s1);
         assertNotNull(s2);
         assertEquals(s1, s2);

@@ -13,11 +13,11 @@ public class WebsocketComponentServlet extends WebSocketServlet {
 
     private static final long serialVersionUID = 207837507742337364L;
 
-    private WebsocketStore store;
     private WebsocketConsumer consumer;
+    private NodeSynchronization sync;
 
-    public WebsocketComponentServlet(WebsocketStore store) {
-        this.store = store;
+    public WebsocketComponentServlet(NodeSynchronization sync) {
+        this.sync = sync;
     }
 
     /**
@@ -45,7 +45,7 @@ public class WebsocketComponentServlet extends WebSocketServlet {
     @Override
     public WebSocket doWebSocketConnect(HttpServletRequest request,
             String protocol) {
-        return new DefaultWebsocket(store, consumer);
+        return new DefaultWebsocket(sync, consumer);
     }
 
 }

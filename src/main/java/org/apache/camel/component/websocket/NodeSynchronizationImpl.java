@@ -3,6 +3,7 @@ package org.apache.camel.component.websocket;
 public class NodeSynchronizationImpl implements NodeSynchronization {
 
 	private WebsocketStore memoryStore;
+	
 	private WebsocketStore globalStore;
 	
 	public NodeSynchronizationImpl(WebsocketStore memoryStore, WebsocketStore globalStore){

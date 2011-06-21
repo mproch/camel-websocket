@@ -30,7 +30,7 @@ public class WebsocketComponentServletTest {
     private WebsocketConsumer consumer;
 
     @Mock
-    private WebsocketStore store;
+    private NodeSynchronization sync;
     
     @Mock
     private HttpServletRequest request;
@@ -42,7 +42,7 @@ public class WebsocketComponentServletTest {
      */
     @Before
     public void setUp() throws Exception {
-        websocketComponentServlet = new WebsocketComponentServlet(store);
+        websocketComponentServlet = new WebsocketComponentServlet(sync);
     }
 
     /**
@@ -75,7 +75,7 @@ public class WebsocketComponentServletTest {
         DefaultWebsocket defaultWebsocket = (DefaultWebsocket) webSocket;
         defaultWebsocket.setConnectionKey(CONNECTION_KEY);
         defaultWebsocket.onMessage(MESSAGE);
-        InOrder inOrder = inOrder(consumer, store, request);
+        InOrder inOrder = inOrder(consumer, sync, request);
         inOrder.verify(consumer, times(1)).sendExchange(CONNECTION_KEY, MESSAGE);
         inOrder.verifyNoMoreInteractions();
     }
@@ -91,7 +91,7 @@ public class WebsocketComponentServletTest {
         DefaultWebsocket defaultWebsocket = (DefaultWebsocket) webSocket;
         defaultWebsocket.setConnectionKey(CONNECTION_KEY);
         defaultWebsocket.onMessage(MESSAGE);
-        InOrder inOrder = inOrder(consumer, store, request);
+        InOrder inOrder = inOrder(consumer, sync, request);
         inOrder.verifyNoMoreInteractions();
     }
 }

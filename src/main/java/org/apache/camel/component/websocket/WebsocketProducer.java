@@ -9,7 +9,6 @@ import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 
 public class WebsocketProducer extends DefaultProducer {
-    
 
     private WebsocketStore store;
 
@@ -29,7 +28,7 @@ public class WebsocketProducer extends DefaultProducer {
         String message = in.getBody(String.class);
         
         if (isSendToAllSet(in)) {
-            sendToAll(store, message);
+            sendToAll(this.store, message);
         }
         else {
             // look for connection key and get Websocket
