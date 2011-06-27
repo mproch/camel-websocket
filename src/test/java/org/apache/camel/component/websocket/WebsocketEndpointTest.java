@@ -39,7 +39,7 @@ public class WebsocketEndpointTest {
      */
     @Before
     public void setUp() throws Exception {
-        websocketEndpoint = new WebsocketEndpoint(URI, component, REMAINING);
+        websocketEndpoint = new WebsocketEndpoint(URI, component, REMAINING, new WebsocketConfiguration());
     }
 
     /**

@@ -11,41 +11,42 @@ import org.eclipse.jetty.websocket.WebSocketServlet;
 
 public class WebsocketComponentServlet extends WebSocketServlet {
 
-    private static final long serialVersionUID = 207837507742337364L;
+	private static final long serialVersionUID = 207837507742337364L;
 
-    private WebsocketConsumer consumer;
-    private NodeSynchronization sync;
+	private WebsocketConsumer consumer;
+	private NodeSynchronization sync;
 
-    public WebsocketComponentServlet(NodeSynchronization sync) {
-        this.sync = sync;
-    }
+	public WebsocketComponentServlet(NodeSynchronization sync) {
+		this.sync = sync;
+	}
 
-    /**
-     * @return the consumer
-     */
-    public WebsocketConsumer getConsumer() {
-        return consumer;
-    }
+	/**
+	 * @return the consumer
+	 */
+	public WebsocketConsumer getConsumer() {
+		return consumer;
+	}
 
-    /**
-     * @param consumer the consumer to set
-     */
-    public void setConsumer(WebsocketConsumer consumer) {
-        this.consumer = consumer;
-    }
+	/**
+	 * @param consumer
+	 *            the consumer to set
+	 */
+	public void setConsumer(WebsocketConsumer consumer) {
+		this.consumer = consumer;
+	}
 
-    @Override
-    protected void doGet(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
-        
-        getServletContext().getNamedDispatcher("default").forward(request,
-                response);
-    }
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 
-    @Override
-    public WebSocket doWebSocketConnect(HttpServletRequest request,
-            String protocol) {
-        return new DefaultWebsocket(sync, consumer);
-    }
+		getServletContext().getNamedDispatcher("default").forward(request,
+				response);
+	}
+
+	@Override
+	public WebSocket doWebSocketConnect(HttpServletRequest request,
+			String protocol) {
+		return new DefaultWebsocket(sync, consumer);
+	}
 
 }

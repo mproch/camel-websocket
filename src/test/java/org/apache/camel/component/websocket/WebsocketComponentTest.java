@@ -117,6 +117,9 @@ public class WebsocketComponentTest {
     @Test
     public void testCreateEndpoint() throws Exception {
         Map<String, Object> parameters = new HashMap<String, Object>();
+        
+        component.setCamelContext(camelContext);
+        
         Endpoint e1 = component.createEndpoint("websocket://foo", "foo", parameters);
         Endpoint e2 = component.createEndpoint("websocket://foo", "foo", parameters);
         Endpoint e3 = component.createEndpoint("websocket://bar", "bar", parameters);
