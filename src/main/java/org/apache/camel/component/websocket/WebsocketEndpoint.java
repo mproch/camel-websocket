@@ -9,12 +9,7 @@ import org.apache.camel.util.ObjectHelper;
 public class WebsocketEndpoint extends DefaultEndpoint {
 
 	// Todo: Change to Options
-	// private NodeSynchronization sync = new NodeSynchronizationImpl(new
-	// MemoryWebsocketStore(), new MemoryWebsocketStore());
-
-	private NodeSynchronization sync = new NodeSynchronizationImpl(
-			new MemoryWebsocketStore(), new MemoryWebsocketStore());
-
+	private NodeSynchronization sync;
 	private String remaining;
 
 	private WebsocketStore memoryStore;
@@ -39,7 +34,7 @@ public class WebsocketEndpoint extends DefaultEndpoint {
 
 		if (websocketConfiguration.getGlobalStore() != null) {
 			this.globalStore = (WebsocketStore) ObjectHelper.loadClass(
-					websocketConfiguration.getGlobalStore()).newInstance();
+					this.websocketConfiguration.getGlobalStore()).newInstance();
 		}
 
 		// this.sync = new NodeSynchronizationImpl(this.memoryStore, null);

@@ -49,15 +49,6 @@
 			<version>${jetty-version}</version>
 		</dependency>
 
-		<!-- test for hazelcastStore -->
-		<!--
-		<dependency>
-			<groupId>com.catify.persistence.hazelcast</groupId>
-			<artifactId>websocketHazelcastStore</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		-->
-		
 		<!-- logging -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -69,7 +60,6 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.1</version>
 		</dependency>
-
 
 
 		<!-- for testing -->
